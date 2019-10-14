@@ -114,7 +114,8 @@ Alma Mater Studiorum - Università di Bologna, Cesena. \\ % Your institution for
 %----------------------------------------------------------------------------------------
 
 %------------------------------------------------
-\section{Comovement patterns} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+\section{GCMP: un framework generico per il mining di Comovements}
+\subsection{Comovement patterns} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
 
 \begin{frame}
 
@@ -191,7 +192,7 @@ di uno spazio chiamato \textit{disk} di raggio \textit{r}.
 
 %------------------------------------------------
 
-\section{GCMP: un framework generico per il mining di Comovements}
+
 
 \subsection{Obiettivi e definizione del problema e dei parametri}
 
@@ -469,15 +470,127 @@ Date due sequenze:
 
 
 
-\subsection{Subtrajectory Clustering}
+\section{Subtrajectory Clustering}
+
+\begin{frame}
+	\frametitle{Distribuited Subtrajectory Clustering overview}
+	
+	Il problema del \textit{Distribuited Subtrajectory Clustering} viene suddiviso in tre passi:
+	
+	\begin{itemize}
+		\item \textbf{Subtrajectory Join}
+		\item \textbf{Trajectory Segmentation}
+		\item \textbf{Clustering and Outlier detection}
+	\end{itemize}
+
+In letteratura ci sono tante possibili soluzioni per affrontare il problema, ma nessuna di queste utilizza un approccio distribuito.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Formulazione del problema}
+	Dato \textit{D} come un set di traiettoria, si identifica \textit{r} come una traiettoria composta da \textit{timestamp location}, ovvero dati nella forma \textless (\textit{loc\textsubscript{i}, t\textsubscript{i}})\textgreater, lunga \textit{n}.
+	
+	Data una traiettoria \textit{r} si definisce sotto-traiettoria l'insieme dei punti 
+	
+	\{\textit{r\textsubscript{i},..,r\textsubscript{j}}\} con \textit{i} \textgreater 1 e \textit{j} \textless \textit{n}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Similarità tra le traiettorie}
+	Per riuscire a ottenere una metrica resistente a traiettorie di lunghezza diversa, con scale temporali diverse e mancanza di coordinamento, si è scelto di utilizzare una variante pesata di \textit{LCSS} con alcuni parametri collegati:
+	\begin{itemize}
+		\item $\epsilon$\textsubscript{t}: specifica il range temporale entro cui due punti sono considerati vicini.
+			\item $\epsilon$\textsubscript{sp}: specifica il range spaziale entro cui due punti sono considerati vicini.
+	\end{itemize}
+\end{frame}
+
 
 \subsection{DSC Alghorithm}
 
 \subsubsection{Subtrajectory Join}
 
+\begin{frame}
+	\frametitle{Subtrajectory Join: idea}
+	Primo dei tre passi dell'algortimo, per ogni traiettoria \textit{r} $\in$ \textit{D} si cercano tutti gli oggetti con relative porzioni che si sono mossi in uno spaziotempo vicino a quello della traiettoria.
+	
+	Ciò viene ottenuto con un'operazione di \textit{Self Join}. per ogni coppia di traiettorie \textit{r} e \textit{s} vengono ricercate e trovate tutte le sotto-traiettorie comuni con una certa durata, candidate alla \textit{Long Common Sub Sequence} .
+	
+	Definendo formalmente: Date una tolleranza spaziale  $\epsilon$\textsubscript{sp} e una temporale  $\epsilon$\textsubscript{t} e un limite inferiore alla durata temporale $\delta$\textsubscript{t}, si recuperano tutte le coppie (\textit{r', s'}) $\in$ D tali che 
+	la durata di entrambe le sottosequenze è maggiore della soglia $\delta$\textsubscript{t} e
+	$\forall$ \textit{r\textsubscript{i}} $\in$ \textit{r'} $\exists$ \textit{s\textsubscript{j}} $\in$ 
+	\textit{s'} tale che \textit{d\textsubscript{s}(r\textsubscript{i}, s\textsubscript{j})} e 
+	\textit{d\textsubscript{t}(r\textsubscript{i}, s\textsubscript{j})}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Subtrajectory Join: implementazione}
+Per quanto riguarda l'implementazione del \textbf{Subtrajectory Join} si usa \textit{DJT}, che si compone di due fasi:
+
+\begin{itemize}
+	\item \textbf{Join}: fase in cui dati i punti in un certo intervallo temporale  viene calcolata la vicinanza con ogni altro punto dello stesso intrevallo.
+	\item \textbf{Refine}: fase in cui le traiettorie vengono riunificate portandosi dietro il loro vicinato.
+\end{itemize}
+
+Come preprocessing viene fatta un operazione di \textit{Repartitioning}, in cui le traiettorie sono scomposte nei loro punti e questi sono divisi in partizioni con stessa densità sulla base del tempo.
+
+\end{frame}
+
 \subsubsection{Trajectory Segmentation}
 
+\begin{frame}
+	\frametitle{Trajectory Segmentation: idea}
+	Secondo dei tre passi dell'algoritmo, dato in ingresso una traiettoria e il suo vicinato, produce uno split in \textit{m} sottotraiettorie sulla base di cambiamenti nella composizione del vicinato
+\end{frame}
+
+\begin{frame}
+	\frametitle{Trajectory Segmentation: implementazione}
+    Vengono individuati due possibili metodi per la ricerca di cambiamenti nel vicinato:
+    \begin{itemize}
+    	\item \textbf{TSA\textsubscript{1}}: individua le sotto-traiettorie mediante un cambiamento di densità nel vicinato.
+    	\item \textbf{TSA\textsubscript{2}}: individua le sotto-traiettorie sulla base di un cambiamento nella composizione del vicinato.
+    \end{itemize}
+
+A prescindere dal criterio utilizzato, l'algoritmo si basa su due \textit{Sliding windows} che scorrono sulla traiettoria con un certo scarto temporale.
+
+Queste finestre sono caratterizzate dal parametro $\omega$ che individua la dimensione della finestra in termini di numero di elementi e $\tau$ che invece identifica la soglia di segmentazione per una sottotraiettoria.
+\end{frame}
+
 \subsubsection{Subtrajectory Clustering}
+
+\begin{frame}
+		\frametitle{Subtrajectory Clustering: idea}
+		Terzo dei tre passi dell'algoritmo, prende in ingresso le sotto-traiettorie individuate al passo precedente e le clusterizza in un insieme di cluster separati.
+		
+		Il meccanismo di clustering prevede l'elezione di un rappresentante per cluster, chiamato \textit{R\textsubscript{i}}, che viene utilizzato come punto di riferimento per l'assegnazione di una nuova sottotraiettoria a un cluster.
+		
+		L'obiettivo di questa fase  è di minimizzare la somma delle distanze fra il rappresentante di ogni cluster e gli elementi che ne fanno parte
+\end{frame}
+
+\begin{frame}
+	\frametitle{Subtrajectory Clustering: implementazione}
+ 	L'input per questa fase è una trasformazione di quello emesso al termine della fase due, occorre infatti determinare la similarità tra ogni sottotraiettoria prima di procedere con le operazioni di clustering.
+ 	
+ 	Sono aggiunti inoltre due parametri: $\alpha$ che rappresenta la distanza massima a cui una sottoraiettoria può essere da un rappresentante del cluster e \textit{K} che è un \textit{lower bound} sul voting(espresso nella fase due) per l'elezione dei rappresentanti.
+ 	Alla fase di clustering segue poi una fase di raffinamento dei risultati, dove vengono eliminate sotto-traiettorie ripetute, si uniscono cluster simili e eventualmente si riassegnano gli outlier.\ 
+\end{frame}
+
+\begin{frame}
+	\frametitle{Output}
+	Come output il framework presenta una serie di cluster di sotto-traiettorie e un insieme di outlier.
+\end{frame}
+
+\begin{frame}
+	\frametitle{DSC flow}
+\begin{center}
+	\includegraphics[scale=0.3]{DSC-flow}
+\end{center}
+\end{frame}
+
+\section{Conclusioni}
+\begin{frame}
+	\frametitle{Conclusioni}
+	Entrambi gli approcci presentati offrono un framework compatibile con le moderne tecnologie in ambito \textit{Big Data}, entrambe propongono soluzioni a un problema simile, tuttavia le idee e implementazioni dei due framework sono totalmente differenti tra loro
+\end{frame}
 
 
 
