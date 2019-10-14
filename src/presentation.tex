@@ -308,7 +308,7 @@ mentre \textit{T} rappresenta la sequenza temporale per cui l'insieme di oggetti
 
 \begin{frame}
 	\frametitle{Generazione degli snapshot 3}
-	Su ogni \textit{P'} così individuato viene applicato un algoritmo di Clustering(\textit{DBSCAN}
+	Su ogni \textit{P'} così individuato viene applicato un algoritmo di clustering(\textit{DBSCAN}
 	nel caso si necessiti di un algoritmo \textit{density based }, \textit{disk-based clustering} qualora si voglia utilizzare una metrica basata sulla distanza).
 	I clustering di oggetti così individuati sono raggruppati in un set e vengono associati all'istante temporale \textit{t} che identifica \textit{P'}.
 	
@@ -412,12 +412,12 @@ Date due sequenze:
 
 
 \begin{frame}
-	\frametitle{Sequence simplification }
+	\frametitle{Decomposable sequence}
 	Data una sequenza \textit{T}, questa viene definita come decomponibile se ogni sua \textit{MGS} è \textit{L-consecutive} e lunga almeno \textbf{K} elementi.
 \end{frame}
 
 \begin{frame}
-	\frametitle{Decomposable sequence}
+	\frametitle{Sequence simplification}
 	Data una sequenza \textit{T}, viene prodotta una nuova sequenza \textit{T'} tramite una funzione \textit{Sim} che si compone di due passaggi: 
 	\begin{enumerate}
 		\item \textbf{f-step}: rimuove tutti i segmenti di \textit{T} che non sono \textit{L-consecutive}.
@@ -513,10 +513,10 @@ In letteratura ci sono tante possibili soluzioni per affrontare il problema, ma 
 	\frametitle{Subtrajectory Join: idea}
 	Primo dei tre passi dell'algortimo, per ogni traiettoria \textit{r} $\in$ \textit{D} si cercano tutti gli oggetti con relative porzioni che si sono mossi in uno spaziotempo vicino a quello della traiettoria.
 	
-	Ciò viene ottenuto con un'operazione di \textit{Self Join}. per ogni coppia di traiettorie \textit{r} e \textit{s} vengono ricercate e trovate tutte le sotto-traiettorie comuni con una certa durata, candidate alla \textit{Long Common Sub Sequence} .
+	Ciò viene ottenuto con un'operazione di \textit{Self Join}. per ogni coppia di traiettorie \textit{r} e \textit{s} vengono ricercate e trovate tutte le sotto-traiettorie comuni con una certa durata, candidate alla \textit{Long Common Sub Sequence}.
 	
 	Definendo formalmente: Date una tolleranza spaziale  $\epsilon$\textsubscript{sp} e una temporale  $\epsilon$\textsubscript{t} e un limite inferiore alla durata temporale $\delta$\textsubscript{t}, si recuperano tutte le coppie (\textit{r', s'}) $\in$ D tali che 
-	la durata di entrambe le sottosequenze è maggiore della soglia $\delta$\textsubscript{t} e
+	la durata di entrambe le sotto-sequenze è maggiore della soglia $\delta$\textsubscript{t} e
 	$\forall$ \textit{r\textsubscript{i}} $\in$ \textit{r'} $\exists$ \textit{s\textsubscript{j}} $\in$ 
 	\textit{s'} tale che \textit{d\textsubscript{s}(r\textsubscript{i}, s\textsubscript{j})} e 
 	\textit{d\textsubscript{t}(r\textsubscript{i}, s\textsubscript{j})}
@@ -589,7 +589,7 @@ Queste finestre sono caratterizzate dal parametro $\omega$ che individua la dime
 \section{Conclusioni}
 \begin{frame}
 	\frametitle{Conclusioni}
-	Entrambi gli approcci presentati offrono un framework compatibile con le moderne tecnologie in ambito \textit{Big Data}, entrambe propongono soluzioni a un problema simile, tuttavia le idee e implementazioni dei due framework sono totalmente differenti tra loro
+	Entrambi gli approcci presentati offrono un framework compatibile con le moderne tecnologie in ambito \textit{Big Data}, entrambe propongono soluzioni a un problema simile, tuttavia le idee e implementazioni dei due framework sono totalmente differenti tra loro.
 \end{frame}
 
 
