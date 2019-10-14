@@ -263,11 +263,200 @@ Configurando i vari parametri, posso ottenere le cinque tipologie di \textit{Co-
 
 \subsection{Algoritmo di risoluzione}
 
+\begin{frame}
+	
+	\frametitle{Overview}
+	
+	L'algoritmo di risoluzione proposto dal framework \textit{GCPM} si compone di tre fasi:
+	
+	\begin{itemize}
+		
+		\item \textbf{Generazione degli snapshot}
+		
+		\item \textbf{Star Partitioning}
+		
+		\item \textbf{Apriori Enumeration}
+	\end{itemize}
+
+Il risultato final dell'algoritmo consiste in una serie di tuple nella forma  \textless \textit{O,T}\textgreater,  dove \textit{O} è un insieme di oggetti identificati da un ID univoco, 
+mentre \textit{T} rappresenta la sequenza temporale per cui l'insieme di oggetti \textit{O} ha viaggiato in luoghi vicini.
+	
+\end{frame}	
+
+\begin{frame}
+	\frametitle{Preprocessing dei dati}
+	Unica operazione da eseguire per il preprocessing è l'unificazione di tutti i dati temporali alla stessa scala di misura:
+	è importante che fra le misure temporali delle varie traiettorie sia definita una scala e dei criteri di misura che permettano di determinare se un istante è venuto o meno prima di un altro, 
+	se due istanti sono consecutivi.
+\end{frame}
+
 \subsubsection{Generazione degli Snapshot}
+
+\begin{frame}
+	\frametitle{Generazione degli snapshot 1}
+	Il primo passo dell'algoritmo consiste nella generazione degli \textit{Snapshots}, che altro non sono che raggruppamenti di oggetti in uno specifico istante temporale \textit{t}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Generazione degli snapshot 2}
+	Ogni traiettoria associata ad un oggetto viene scomposta nell' insieme di punti che la compongono \textit{P}, ciascun punto \textit{p} viene poi aggregato in un nuovo insieme, chiamato \textit{P'} sulla base dell'attributo \textit{p.t}, ovvero la sua coordinata temporale.
+	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Generazione degli snapshot 3}
+	Su ogni \textit{P'} così individuato viene applicato un algoritmo di Clustering(\textit{DBSCAN}
+	nel caso si necessiti di un algoritmo \textit{density based }, \textit{disk-based clustering} qualora si voglia utilizzare una metrica basata sulla distanza).
+	I clustering di oggetti così individuati sono raggruppati in un set e vengono associati all'istante temporale \textit{t} che identifica \textit{P'}.
+	
+	Gli \textit{Snapshots} sono dunque nella forma \textless \textit{t, S(t)} \textgreater, dove \textit{t} è l'istante temporale mentre \textit{S(t)} è il set di clusters associato 
+\end{frame}
 
 \subsubsection{Star Partitioning}
 
+\begin{frame}
+	\frametitle{G \textsubscript{t} e G\textsubscript{A}}
+Dato uno \textit{snapshot s\textsubscript{i}} definiamo il grafo \textit{G\textsubscript{ti}} come un grafo dove i nodi sono tutti gli oggetti del dataset e due nodi sono connessi da un arco se e solo se appartengono a uno stesso cluster.
+Definiamo \textit{G\textsubscript{A}}, chiamato anche \textit{Associated Graph}, come l'insieme di tutti i \textit{G\textsubscript{i}} individuati dagli \textit{snapshot}:
+
+L'insieme dei nodi sarà ancora una volta l'insieme degli oggetti e due nodi saranno connessi se compaiono all'interno di uno stesso cluster di un qualunque \textit{snapshot}.
+Essendo possibile che due oggetti compaiano in più \textit{snapshot} all'interno di uno stesso cluster, sugli archi di questo grafo verrà mantenuta traccia degli istanti temporali in cui due oggetti compaiono nello stesso cluster. 
+\end{frame}
+
+\begin{frame}
+	\frametitle{Directed star}
+	\textit{G\textsubscript{A}} rappresenta il punto di partenza per catturare le relazioni tra coppie di oggetti, tuttavia non essendo  \textit{G\textsubscript{A}} un grafo orientato, occorre una tecnica per attraversare il grafo in maniera efficace e evitare di individuare coppie di nodi già visitate.
+	
+	\textbf{Directed Star} realizza tale struttura in due passi:
+	\begin{enumerate}
+		\item viene realizzato un ordinamento globale degli oggetti.
+		\item si scorre \textit{G\textsubscript{A}} partendo dal nodo con Global ID=1, per ciascun nodo N si prendono in considerazione tutti i suoi vicini(ovvero connessi con un arco) con Global ID\textgreater   N.Global ID, vengono poi generate tutte le coppie 
+		\textless \textit{N, V\textsubscript{i}: T(i)}\textgreater  dove \textit{N} è il nodo esaminato,
+		\textit{V\textsubscript{i}} è l'i-esimo nodo vicino e \textit{T(i)} è la sequenza di istanti temporali contenuta nell'arco tra \textit{N} e \textit{V\textsubscript{i}}
+	\end{enumerate}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Ordinamento globale}
+	Data la natura scalabile dell'algoritmo di generazione delle coppie sopracitato, è fondamentale che nel criterio di ordinamento e numerazione si scelga un criterio che permetta ad ogni nodo di avere circa lo stesso numero di vicini.
+	
+	Dati \textit{n} oggetti, ci sono \textit{n!} possibili ordinamenti.
+	
+	Utilizzare un criterio di ordinamento random, come ad esempio ordinando sugli IDs degli oggetti da performance tutto sommato accettabili.
+\end{frame}
+
 \subsubsection{Apriori Enumeration}
+
+\begin{frame}
+	\frametitle{Definizione di monotonicità}
+	Dato un \textit{GCMP} con un objectset \{\textit{o\textsubscript{1}, ..., o\textsubscript{n}}\} , la fase di \textbf{Star Partitioning} produce coppie nella forma 
+	\textless \textit{o\textsubscript{i}, o\textsubscript{j}. T} \textgreater.
+	In linea teorica dovrebbe essere possibile applicare il principio \textit{Apriori} nella generazione dei candidati, tuttavia è facile dimostrare che la proprietà della monotonicità non vale per queste tuple.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Monotonicità classica}
+Date due sequenze: 
+
+	\textless \textit{o\textsubscript{i}, o\textsubscript{j}. 1,2,3,6} \textgreater
+	
+		\textless \textit{o\textsubscript{i}, o\textsubscript{z}. 1,2,3,7} \textgreater
+		
+		Con \textbf{L} = 2, \textbf{K} = 3 e \textbf{G} = 2
+		
+		E' intuitivo vedere che che entrambe le sequenze non risultano  \textit{L-Consecutive}.
+		
+		Al contrario, il superset ottenuto fondendo le due sequenze:
+		
+		\textless \textit{o\textsubscript{i},o\textsubscript{j}  ,o\textsubscript{z}. 1,2,3} \textgreater
+		
+		
+		Risulta \textit{L-Consecutive}.
+		
+		E' quindi dimostrato che occorre trovare una nuova definizione di monotonicità.
+		
+\end{frame}
+
+\begin{frame}
+	\frametitle{Tre nuovi concetti}
+	Per giungere a una nuova definizione di monotonicità serve introdurre tre nuovi concetti:
+	
+	\begin{itemize}
+		\item \textbf{Maximal G-Connected sequence}
+		\item \textbf{Decomposable sequence}
+		\item \textbf{Sequence semplification}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Maximal G-connected sequence}
+	\textit{T'} è definibile come 
+	\textit{MGS} di \textit{T} se \textit{T'} è sottosequenza di \textit{T} e non esiste \textit{T''} tale che \textit{T'} è sottosequenza di \textit{T''} e \textit{T''} è \textit{G-connected}.
+	
+	Ogni sequenza può avere \textit{n} MGS di dimensioni differenti.
+	
+	Ogni \textit{MGS} gode delle seguenti proprietà: 
+	\begin{enumerate}
+		\item Ogni \textit{MGS} è disgiunta dalle altre se non per un elemento in comune.
+		\item Data una sequenza, l'unione di tutte le sue \textit{MGS} dà come risultato la sequenza stessa.
+		\item Date due sequenze \textit{T\textsubscript{1}} e \textit{T\textsubscript{2}} dove
+		\textit{T\textsubscript{1}} è sotto-sequenza di \textit{T\textsubscript{2}}, allora per ogni \textit{MGS} di \textit{T\textsubscript{1}} si può trovare una \textit{MGS} di 
+		\textit{T\textsubscript{2}} tale che la \textit{MGS} di \textit{T\textsubscript{1}} sia sottosequenza della \textit{MGS} di \textit{T\textsubscript{2}}     
+	\end{enumerate}
+	
+	\end{frame}
+
+
+\begin{frame}
+	\frametitle{Sequence simplification }
+	Data una sequenza \textit{T}, questa viene definita come decomponibile se ogni sua \textit{MGS} è \textit{L-consecutive} e lunga almeno \textbf{K} elementi.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Decomposable sequence}
+	Data una sequenza \textit{T}, viene prodotta una nuova sequenza \textit{T'} tramite una funzione \textit{Sim} che si compone di due passaggi: 
+	\begin{enumerate}
+		\item \textbf{f-step}: rimuove tutti i segmenti di \textit{T} che non sono \textit{L-consecutive}.
+		\item \textbf{g-step} tra le \textit{MGS} ricavate dalla sequenza uscita dal passo precedente, rimuove quelle con dimensioni minori di \textbf{K}.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Nuova monotonicità}
+   Dato un canditato \textit{C = \{O:T\}} dove \textit{O} è una sequenza di oggetti e \textit{T} una sequenza temporale, se \textit{Sim(T)} = $\emptyset$ allora il candidato può essere eliminato e così tutte le sue soprasequenze.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Algoritmo aPriori}
+	\begin{enumerate}
+		\item Ogni coppia va a generare il livello base della struttura
+		\item Viene fatto pruning sulle coppie basandosi sulla funzione di semplificazione \textit{Sim}
+		\item Tramite un indicatore di livello, vengono generati dei candidati di dimensione del livello, il join tra due candidati del livello precedente \textit{C\textsubscript{1}} e
+		 \textit{C\textsubscript{2}} viene effettuato unendo gli object-set e intersecando le sequenze temporali.
+		 \item Per ogni nuovo candidato viene calcolata la semplificazione e viene fatto pruning di conseguenza.
+		 
+		 Candidati che per uno dei vincoli parametrici non possono generare ulteriori candidati sono scartati
+		 
+		 \item Per migliorare le performance, si utilizza il principio della \textit{forward closure}: ogni pattern valido nei termini dei parametri espressi viene mandato in output.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Output}
+	Un set di candidati nella seguente forma: 
+	
+	\begin{center}
+		\huge  \textit{C = \{O:T\}} 
+	\end{center}
+	
+	
+\end{frame}
+
+
+
 
 \section{Scalable Distribuited Subtrajectory Clustering}
 
